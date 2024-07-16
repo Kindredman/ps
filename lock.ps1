@@ -2,31 +2,34 @@ function Protect-Directory {
     param (
         [string]$path
     )
-    try {
-        $dirInfo = New-Object System.IO.DirectoryInfo $path
-        $dirSecurity = $dirInfo.GetAccessControl('Access')
 
+    try {
+        # Get the current access control settings for the directory
+        $dirInfo = Get-Item -Path $path
+        $dirSecurity = $dirInfo.GetAccessControl()
+
+        # Create a new rule to deny delete and write permissions to all users
         $denyRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
             [System.Security.Principal.SecurityIdentifier]::new([System.Security.Principal.WellKnownSidType]::WorldSid, $null),
-            [System.Security.AccessControl.FileSystemRights]::Delete -bor [System.Security.AccessControl.FileSystemRights]::Write -bor [System.Security.AccessControl.FileSystemRights]::Modify,
-            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit, 
+            [System.Security.AccessControl.FileSystemRights]"Delete, Write, Modify",
+            [System.Security.AccessControl.InheritanceFlags]"ContainerInherit, ObjectInherit",
             [System.Security.AccessControl.PropagationFlags]::None,
             [System.Security.AccessControl.AccessControlType]::Deny
         )
 
+        # Add the rule to the directory's security settings
         $dirSecurity.AddAccessRule($denyRule)
-        $dirInfo.SetAccessControl($dirSecurity)
 
-        Write-Output "Successfully updated permissions for: $path"
+        # Apply the updated access control settings to the directory
+        Set-Acl -Path $path -AclObject $dirSecurity
+
+        Write-Output "Permissions updated successfully for $path"
     }
     catch [System.UnauthorizedAccessException] {
-        Write-Output "Access denied to directory: $path"
-    }
-    catch [System.IO.IOException] {
-        Write-Output "IO error for directory: $path. It might be a OneDrive directory."
+        Write-Error "UnauthorizedAccessException: You do not have permission to modify access control settings for this directory."
     }
     catch {
-        Write-Output "Failed to update permissions for: $path. Error: $_"
+        Write-Error "Exception: $_"
     }
 }
 
