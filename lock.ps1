@@ -1,4 +1,5 @@
 
+
 function Protect-Directory {
     param (
         [string]$path
@@ -38,6 +39,8 @@ $importantDirectories = @(
 
 foreach ($path in $importantDirectories) {
     Protect-Directory -path $path
+    # Uncomment the next line if you need to use the Protect-Directory function
+    # Protect-Directory -path $path
 }
 
 Exit
