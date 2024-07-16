@@ -1,5 +1,3 @@
-
-
 function Protect-Directory {
     param (
         [string]$path
@@ -18,13 +16,21 @@ function Protect-Directory {
 
         $dirSecurity.AddAccessRule($denyRule)
         $dirInfo.SetAccessControl($dirSecurity)
+
+        Write-Output "Successfully updated permissions for: $path"
     }
     catch [System.UnauthorizedAccessException] {
-        # Handle access denied silently
+        Write-Output "Access denied to directory: $path"
     }
     catch {
-        # Handle other exceptions silently
+        Write-Output "Failed to update permissions for: $path"
     }
+}
+
+# Ensure the script runs with elevated privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Output "Script is not running as Administrator. Please run the script with elevated privileges."
+    exit
 }
 
 # Define the important directories
@@ -39,8 +45,6 @@ $importantDirectories = @(
 
 foreach ($path in $importantDirectories) {
     Protect-Directory -path $path
-    # Uncomment the next line if you need to use the Protect-Directory function
-    # Protect-Directory -path $path
 }
 
 Exit
