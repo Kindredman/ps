@@ -4,12 +4,12 @@ function Protect-Directory {
     )
     try {
         $dirInfo = New-Object System.IO.DirectoryInfo $path
-        $dirSecurity = $dirInfo.GetAccessControl()
+        $dirSecurity = $dirInfo.GetAccessControl('Access')
 
         $denyRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
             [System.Security.Principal.SecurityIdentifier]::new([System.Security.Principal.WellKnownSidType]::WorldSid, $null),
             [System.Security.AccessControl.FileSystemRights]::Delete -bor [System.Security.AccessControl.FileSystemRights]::Write -bor [System.Security.AccessControl.FileSystemRights]::Modify,
-            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [System.Security.AccessControl.InheritanceFlags]::ObjectInherit,
+            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit, 
             [System.Security.AccessControl.PropagationFlags]::None,
             [System.Security.AccessControl.AccessControlType]::Deny
         )
@@ -22,8 +22,11 @@ function Protect-Directory {
     catch [System.UnauthorizedAccessException] {
         Write-Output "Access denied to directory: $path"
     }
+    catch [System.IO.IOException] {
+        Write-Output "IO error for directory: $path. It might be a OneDrive directory."
+    }
     catch {
-        Write-Output "Failed to update permissions for: $path"
+        Write-Output "Failed to update permissions for: $path. Error: $_"
     }
 }
 
@@ -44,7 +47,11 @@ $importantDirectories = @(
 )
 
 foreach ($path in $importantDirectories) {
-    Protect-Directory -path $path
+    if (Test-Path $path) {
+        Protect-Directory -path $path
+    } else {
+        Write-Output "Directory does not exist: $path"
+    }
 }
 
 Exit
