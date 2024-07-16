@@ -1,19 +1,3 @@
-# Define the important directories
-$importantDirectories = @(
-    [Environment]::GetFolderPath("MyDocuments"),
-    [Environment]::GetFolderPath("MyPictures"),
-    [Environment]::GetFolderPath("MyMusic"),
-    [Environment]::GetFolderPath("MyVideos"),
-    [Environment]::GetFolderPath("Desktop"),
-    "C:\path\to\other\important\directory" # Add other important directories as needed
-)
-
-foreach ($path in $importantDirectories) {
-    Restore-DirectoryPermissions -path $path
-}
-
-Exit
-
 function Restore-DirectoryPermissions {
     param (
         [string]$path
@@ -40,3 +24,20 @@ function Restore-DirectoryPermissions {
         # Handle other exceptions silently
     }
 }
+
+
+# Define the important directories
+$importantDirectories = @(
+    [Environment]::GetFolderPath("MyDocuments"),
+    [Environment]::GetFolderPath("MyPictures"),
+    [Environment]::GetFolderPath("MyMusic"),
+    [Environment]::GetFolderPath("MyVideos"),
+    [Environment]::GetFolderPath("Desktop"),
+    "C:\path\to\other\important\directory" # Add other important directories as needed
+)
+
+foreach ($path in $importantDirectories) {
+    Restore-DirectoryPermissions -path $path
+}
+
+Exit
