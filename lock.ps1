@@ -45,7 +45,7 @@ $importantDirectories = @(
     [Environment]::GetFolderPath("MyPictures"),
     [Environment]::GetFolderPath("MyMusic"),
     [Environment]::GetFolderPath("MyVideos"),
-    [Environment]::GetFolderPath("Desktop"),
+    [Environment]::GetFolderPath("Desktop")
     # "C:\path\to\other\important\directory" # Add other important directories as needed
 )
 
