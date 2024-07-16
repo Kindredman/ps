@@ -33,6 +33,12 @@ function Restore-DirectoryPermissions {
     }
 }
 
+# Ensure the script runs with elevated privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Output "Script is not running as Administrator. Please run the script with elevated privileges."
+    exit
+}
+
 # Define the important directories
 $importantDirectories = @(
     [Environment]::GetFolderPath("MyDocuments"),
@@ -44,9 +50,11 @@ $importantDirectories = @(
 )
 
 foreach ($path in $importantDirectories) {
-    Restore-DirectoryPermissions -path $path
-    # Uncomment the next line if you need to use the Protect-Directory function
-    # Protect-Directory -path $path
+    if (Test-Path $path) {
+       Restore-DirectoryPermissions -path $path
+    } else {
+        Write-Output "Directory does not exist: $path"
+    }
 }
 
 Exit
