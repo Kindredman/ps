@@ -2,53 +2,34 @@ function Restore-DirectoryPermissions {
     param (
         [string]$path
     )
+
     try {
-        $dirInfo = New-Object System.IO.DirectoryInfo $path
+        # Get the current access control settings for the directory
+        $dirInfo = Get-Item -Path $path
         $dirSecurity = $dirInfo.GetAccessControl()
 
+        # Create a new rule to match the deny rule we want to remove
         $denyRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
             [System.Security.Principal.SecurityIdentifier]::new([System.Security.Principal.WellKnownSidType]::WorldSid, $null),
-            [System.Security.AccessControl.FileSystemRights]::Delete -bor [System.Security.AccessControl.FileSystemRights]::Write -bor [System.Security.AccessControl.FileSystemRights]::Modify,
-            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [System.Security.AccessControl.InheritanceFlags]::ObjectInherit,
+            [System.Security.AccessControl.FileSystemRights]"Delete, Write, Modify",
+            [System.Security.AccessControl.InheritanceFlags]"ContainerInherit, ObjectInherit",
             [System.Security.AccessControl.PropagationFlags]::None,
             [System.Security.AccessControl.AccessControlType]::Deny
         )
 
+        # Remove the rule from the directory's security settings
         $dirSecurity.RemoveAccessRule($denyRule)
-        $dirInfo.SetAccessControl($dirSecurity)
+
+        # Apply the updated access control settings to the directory
+        Set-Acl -Path $path -AclObject $dirSecurity
+
+        Write-Output "Permissions restored successfully for $path"
     }
     catch [System.UnauthorizedAccessException] {
-        # Handle access denied silently
+        Write-Error "UnauthorizedAccessException: You do not have permission to modify access control settings for this directory."
     }
     catch {
-        # Handle other exceptions silently
-    }
-}
-
-function Protect-Directory {
-    param (
-        [string]$path
-    )
-    try {
-        $dirInfo = New-Object System.IO.DirectoryInfo $path
-        $dirSecurity = $dirInfo.GetAccessControl()
-
-        $denyRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-            [System.Security.Principal.SecurityIdentifier]::new([System.Security.Principal.WellKnownSidType]::WorldSid, $null),
-            [System.Security.AccessControl.FileSystemRights]::Delete -bor [System.Security.AccessControl.FileSystemRights]::Write -bor [System.Security.AccessControl.FileSystemRights]::Modify,
-            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [System.Security.AccessControl.InheritanceFlags]::ObjectInherit,
-            [System.Security.AccessControl.PropagationFlags]::None,
-            [System.Security.AccessControl.AccessControlType]::Deny
-        )
-
-        $dirSecurity.AddAccessRule($denyRule)
-        $dirInfo.SetAccessControl($dirSecurity)
-    }
-    catch [System.UnauthorizedAccessException] {
-        # Handle access denied silently
-    }
-    catch {
-        # Handle other exceptions silently
+        Write-Error "Exception: $_"
     }
 }
 
@@ -59,7 +40,7 @@ $importantDirectories = @(
     [Environment]::GetFolderPath("MyMusic"),
     [Environment]::GetFolderPath("MyVideos"),
     [Environment]::GetFolderPath("Desktop"),
-    "C:\path\to\other\important\directory" # Add other important directories as needed
+    # "C:\path\to\other\important\directory" # Add other important directories as needed
 )
 
 foreach ($path in $importantDirectories) {

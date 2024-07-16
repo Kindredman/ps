@@ -46,7 +46,7 @@ $importantDirectories = @(
     [Environment]::GetFolderPath("MyMusic"),
     [Environment]::GetFolderPath("MyVideos"),
     [Environment]::GetFolderPath("Desktop"),
-    "C:\path\to\other\important\directory" # Add other important directories as needed
+    # "C:\path\to\other\important\directory" # Add other important directories as needed
 )
 
 foreach ($path in $importantDirectories) {
